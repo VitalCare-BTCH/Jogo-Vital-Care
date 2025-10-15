@@ -19,7 +19,6 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            /* Fundo Gradiente Escuro Principal */
             background: linear-gradient(135deg, #0F172A 0%, #080D1A 100%); 
             color: #E2E8F0;
             padding: 20px;
@@ -57,8 +56,8 @@
         .game-container {
             width: 95%;
             max-width: 800px;
-            /* Cor sólida da logo para se unir ao fundo da imagem */
-            background-color: #1F2B5B; 
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(5px);
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
@@ -293,7 +292,7 @@
         // --- CHAVES DO LOCALSTORAGE ---
         const RANKING_KEY = 'vitalcareRanking';
         const PLAY_COUNTS_KEY = 'vitalcarePlayCounts';
-        const LAST_USED_NAME_KEY = 'vitalcareLastUsedName'; // Chave para travar o nome neste PC
+        const LAST_USED_NAME_KEY = 'vitalcareLastUsedName'; 
         
         // --- Lista de Exceção VIP (Jogadas Ilimitadas) ---
         const VIP_USERS = ['Wydgui', 'Fefe01'];
@@ -365,13 +364,31 @@
             return counts[name];
         }
 
+        // NOVO: Função que carrega o ranking e FILTRA para ter APENAS o melhor score por jogador
         function loadRanking() {
-            const ranking = JSON.parse(localStorage.getItem(RANKING_KEY)) || [];
-            return ranking;
+            const rawRanking = JSON.parse(localStorage.getItem(RANKING_KEY)) || [];
+            
+            // Estrutura para rastrear o melhor score por nome
+            const bestScoresMap = new Map();
+
+            rawRanking.forEach(entry => {
+                const name = entry.name;
+                // Se a entrada atual não existe no mapa, ou se o score atual é maior que o score salvo, atualiza
+                if (!bestScoresMap.has(name) || entry.score > bestScoresMap.get(name).score) {
+                    bestScoresMap.set(name, entry);
+                }
+            });
+
+            // Converte o Map de volta para um Array e ordena pelo score
+            const uniqueRanking = Array.from(bestScoresMap.values());
+            uniqueRanking.sort((a, b) => b.score - a.score);
+
+            return uniqueRanking;
         }
 
         function saveScore(name, score, prize, hits, misses) {
-            let ranking = loadRanking();
+            // Salva todas as jogadas (para a pesquisa CSV)
+            let rawRanking = JSON.parse(localStorage.getItem(RANKING_KEY)) || [];
             
             gameID = Date.now(); 
 
@@ -386,16 +403,15 @@
                 redeemed: false 
             };
 
-            ranking.push(newEntry);
+            rawRanking.push(newEntry);
             
-            ranking.sort((a, b) => b.score - a.score);
-            ranking = ranking.slice(0, 50); 
-            
-            localStorage.setItem(RANKING_KEY, JSON.stringify(ranking));
+            // O array bruto é salvo no localStorage
+            localStorage.setItem(RANKING_KEY, JSON.stringify(rawRanking));
         }
 
         function displayRanking() {
-            const ranking = loadRanking();
+            // ESTA FUNÇÃO USA O loadRanking FILTRADO (Apenas o melhor score por nome)
+            const ranking = loadRanking(); 
             
             let html = '<h3>🏆 Top 10 Triagens Rápidas</h3><ol>';
             if (ranking.length === 0) {
@@ -413,7 +429,6 @@
             
             checkAndSetStartButton();
 
-            // Garante que o ranking overlay esteja visível
             rankingOverlay.style.display = 'flex';
             document.querySelector('.game-container').style.display = 'none';
         }
@@ -455,13 +470,14 @@
         }
         
         function exportRankingToCSV() {
-            const ranking = loadRanking();
+            const ranking = JSON.parse(localStorage.getItem(RANKING_KEY)) || []; // Carrega o RAW Ranking
             
             if (ranking.length === 0) {
                 alert('Não há dados para exportar.');
                 return;
             }
 
+            // Cria o cabeçalho usando o array RAW
             const headers = ['ID', 'Data/Hora', 'Nome', 'Score', 'Prêmio', 'Alertas Coletados', 'Erros/Distrações', 'Resgatado'];
             let csv = headers.join(';') + '\n'; 
 
@@ -484,13 +500,13 @@
             
             const url = URL.createObjectURL(blob);
             link.setAttribute("href", url);
-            link.setAttribute("download", `Ranking_VitalCare_${new Date().toISOString().slice(0,10)}.csv`);
+            link.setAttribute("download", `Ranking_VitalCare_RAW_${new Date().toISOString().slice(0,10)}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
 
-            alert(`Sucesso! ${ranking.length} registros foram exportados para o arquivo CSV.`);
+            alert(`Sucesso! ${ranking.length} registros (raw) foram exportados para o arquivo CSV.`);
         }
         
         // --- FUNÇÕES DE JOGO (LÓGICA) ---
@@ -612,6 +628,30 @@
             
             clearInterval(generatorInterval);
             
+            // NOVO: Inicia o Countdown de 5 segundos
+            let countdown = 5;
+            resultMessage.textContent = `PREPARAR, ${currentPlayerName.toUpperCase()}! COMEÇA EM ${countdown}...`;
+            
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    resultMessage.textContent = `PREPARAR! COMEÇA EM ${countdown}...`;
+                } else {
+                    clearInterval(countdownInterval);
+                    gameStartCore(); // Inicia o jogo real
+                }
+            }, 1000);
+        }
+        
+        function gameStartCore() {
+            // Lógica principal do jogo
+            isRunning = true;
+            
+            const statusMessage = VIP_USERS.includes(currentPlayerName) ? 
+                          `PLANTÃO ILIMITADO, ${currentPlayerName.toUpperCase()}!` :
+                          `FOCO MÁXIMO, ${currentPlayerName.toUpperCase()}! O VERMELHO ENCERRA O JOGO.`;
+            resultMessage.textContent = statusMessage;
+            
             timerInterval = setInterval(() => {
                 timeLeft--;
                 timerDisplay.textContent = timeLeft + 's';
@@ -625,6 +665,7 @@
             
             adjustGeneratorSpeed();
         }
+
 
         function classifyPrize(finalScore) {
             if (finalScore >= 150) return 'Exclusivo (Cordão)';
@@ -690,7 +731,7 @@
             const password = prompt('Digite a senha da equipe (vitalcare2025) para confirmar o resgate do prêmio:'); 
             
             if (password === 'vitalcare2025') { 
-                let ranking = loadRanking();
+                let ranking = JSON.parse(localStorage.getItem(RANKING_KEY)) || []; // Carrega o RAW Ranking
                 const entryIndex = ranking.findIndex(e => String(e.id) === token);
                 
                 if (entryIndex !== -1 && !ranking[entryIndex].redeemed) {
