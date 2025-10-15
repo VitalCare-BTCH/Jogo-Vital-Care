@@ -273,24 +273,34 @@
             
             document.querySelectorAll('.game-target').forEach(t => t.remove());
 
-            // --- CLASSIFICAÇÃO DOS BRINDES CORRIGIDA (Do maior score para o menor) ---
+            let finalScore = score;
             let prize = '';
+            let failureReason = '';
             
-            if (success === false) { 
-                // Instant Fail: Praticamente sempre cai no Super Simples
-                prize = 'Super Simples (Adesivo e Bala)';
-            } else if (score >= 150) { 
+            // 1. CLASSIFICAÇÃO BASEADA NO SCORE (Do maior para o menor)
+            // Esta classificação IGNORA se houve falha ou não.
+            if (finalScore >= 150) { 
                 prize = 'Exclusivo (Cordão)';
-            } else if (score >= 90) { 
+            } else if (finalScore >= 90) { 
                 prize = 'Médio (Chaveiro Acrílico Azul)';
-            } else if (score >= 50) { 
+            } else if (finalScore >= 50) { 
                 prize = 'Simples (Chaveiro MDF)';
             } else {
                 prize = 'Super Simples (Adesivo e Bala)'; 
             }
 
-            // Mensagem ajustada para o score final e prêmio
-            resultMessage.innerHTML = `${message} <br>🏆 **Prêmio Ganho:** ${prize} (Score: ${score})`;
+            // 2. AJUSTE DA MENSAGEM: Indica o motivo do fim do jogo.
+            if (success === false) {
+                 // A mensagem indica a penalidade, mas o prêmio (prize) já foi determinado pelo score.
+                 message = `🚨 ERRO FATAL (${finalScore})! O plantão parou na hora.`;
+                 failureReason = ' (Parada por Erro)';
+            } else {
+                 message = '✅ FIM DO PLANTÃO! Seu tempo acabou.';
+                 failureReason = '';
+            }
+
+            // A pontuação final é usada para determinar a mensagem final.
+            resultMessage.innerHTML = `${message} <br>🏆 **Prêmio Ganho:** ${prize}${failureReason} (Score: ${finalScore})`;
             startButton.textContent = 'JOGAR DE NOVO';
             startButton.style.display = 'block';
         }
@@ -300,4 +310,5 @@
     </script>
 </body>
 </html>
+
 
