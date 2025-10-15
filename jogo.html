@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VitalCare - A Triagem Caótica (Ultra Hard)</title>
+    <style>
+        /* CSS Integrado (Visual Moderno e Punitivo) */
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            /* Fundo Gradiente Escuro (Tema VitalCare) */
+            background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); 
+            color: #E2E8F0;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .game-container {
+            width: 95%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(5px);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            user-select: none;
+        }
+
+        h1 {
+            font-size: clamp(1.8em, 5vw, 2.5em);
+            color: #ADFF2F; /* Verde/Ciano de destaque */
+            margin-bottom: 5px;
+        }
+
+        #timer-display {
+            font-size: clamp(3em, 8vw, 4em);
+            font-weight: 700;
+            color: #ffc107; /* Amarelo Crítico para o tempo */
+            margin-bottom: 15px;
+        }
+
+        #score-display {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        /* Área de Jogo (Foco) */
+        #game-area {
+            position: relative;
+            height: 450px;
+            width: 100%;
+            border: 3px solid #dc3545; /* Borda de Risco Crítico */
+            border-radius: 10px;
+            overflow: hidden; 
+            background: rgba(0, 0, 0, 0.4);
+            cursor: crosshair;
+        }
+
+        /* Estilo dos Alvos Flutuantes */
+        .game-target {
+            position: absolute;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+            /* A animação é definida no JS */
+            transition: transform 0.1s, opacity 0.2s; 
+        }
+        
+        .game-target:active {
+            transform: scale(0.85);
+        }
+
+        /* Cores e Símbolos dos Alvos */
+        .critical { background-color: #28a745; z-index: 30; } /* ALVO BOM: Verde Vital */
+        .coffee { background-color: #ffc107; z-index: 30; }   /* ALVO BOM: Amarelo Bônus */
+        .distraction { background-color: #dc3545; z-index: 30; } /* ALVO RUIM: Vermelho Punição */
+
+        /* Animação para forçar o desaparecimento e gerar tensão */
+        @keyframes pulseFade {
+            0% { opacity: 1; transform: scale(1); }
+            90% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0; transform: scale(0.5); }
+        }
+
+        /* Mensagens de Controle */
+        #start-button {
+            padding: 15px 30px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: #ADFF2F;
+            color: #1E293B;
+            border: none;
+            border-radius: 50px;
+            transition: background-color 0.3s;
+        }
+
+        #result-message {
+            margin-top: 15px;
+            font-size: 1.2em;
+            min-height: 50px;
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>A Triagem Caótica: Nível TCC</h1>
+        <p>20s de Plantão. CLIQUE nos Alvos de Ponto (+). Clicar no Vermelho (🛑) é ERRO CRÍTICO!</p>
+
+        <div id="score-display">Pontos: <span id="score">0</span></div>
+        <div id="timer-display">20s</div>
+
+        <div id="game-area">
+            <button id="start-button">INICIAR PLANTÃO DE 20 SEGUNDOS</button>
+        </div>
+
+        <p id="result-message">Seu foco e velocidade definem o prêmio.</p>
+    </div>
+
+    <script>
+        // --- VARIÁVEIS DE CONTROLE E DIFICULDADE ---
+        const gameArea = document.getElementById('game-area');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer-display');
+        const startButton = document.getElementById('start-button');
+        const resultMessage = document.getElementById('result-message');
+        
+        let score = 0;
+        let timeLeft = 0;
+        let isRunning = false;
+        let generatorInterval;
+        let timerInterval;
+
+        // Base de DIFICULDADE
+        const GAME_DURATION = 20; 
+        const BASE_GEN_RATE = 300; // Gera item a cada 0.3s (Extremamente Rápido!)
+        const BASE_LIFESPAN = 1200; // Duração base do alvo: 1.2s (Desaparece antes de clicar)
+        
+        // Configuração de Alvos: ALTA PROBABILIDADE DE ERRO
+        const ITEM_CONFIG = [
+            { type: 'critical', icon: '🚨', points: 15, weight: 2 }, // Alvo BOM (2 em 14)
+            { type: 'coffee', icon: '☕', points: 5, weight: 3 },    // Bônus (3 em 14)
+            { type: 'distraction', icon: '🛑', points: 0, weight: 9 } // PUNIÇÃO (9 em 14 - Mais de 64% de chance)
+        ];
+
+        // --- FUNÇÕES DE LÓGICA E PONTUAÇÃO ---
+
+        function updateScore(points) {
+            score += points;
+            scoreDisplay.textContent = score;
+        }
+
+        function getRandomItemType() {
+            const totalWeight = ITEM_CONFIG.reduce((sum, item) => sum + item.weight, 0);
+            let randomNum = Math.floor(Math.random() * totalWeight);
+            
+            for (const item of ITEM_CONFIG) {
+                if (randomNum < item.weight) {
+                    return item;
+                }
+                randomNum -= item.weight;
+            }
+        }
+        
+        function applyDifficultyTier() {
+            // Dificuldade Aumenta a cada 5 segundos
+            const elapsed = GAME_DURATION - timeLeft;
+            let tier = 0;
+            if (elapsed >= 15) tier = 3; // 15-20s: Tier 3
+            else if (elapsed >= 10) tier = 2; // 10-15s: Tier 2
+            else if (elapsed >= 5) tier = 1; // 5-10s: Tier 1
+            
+            // Fatores de Multiplicação da Velocidade e Duração
+            const rateFactor = [1.0, 0.8, 0.6, 0.4]; // Geração mais rápida (0.3s -> 0.12s)
+            const lifespanFactor = [1.0, 0.8, 0.6, 0.4]; // Duração mais curta (1.2s -> 0.48s)
+
+            // Limpa o intervalo antigo
+            clearInterval(generatorInterval);
+            
+            const newRate = BASE_GEN_RATE * rateFactor[tier];
+            
+            // Inicia o novo gerador (com a nova taxa de velocidade)
+            generatorInterval = setInterval(createTarget, newRate);
+            
+            return BASE_LIFESPAN * lifespanFactor[tier]; // Retorna nova duração
+        }
+
+        function createTarget() {
+            if (!isRunning) return;
+
+            const itemConfig = getRandomItemType();
+            const target = document.createElement('div');
+            const lifespan = applyDifficultyTier(); // Pega a duração com base na dificuldade atual
+            
+            target.className = `game-target ${itemConfig.type}`;
+            
+            // Define o ícone de Punição
+            target.textContent = itemConfig.type === 'distraction' ? '🛑' : itemConfig.icon;
+            
+            // Posição aleatória
+            const maxX = gameArea.clientWidth - 70;
+            const maxY = gameArea.clientHeight - 70;
+            target.style.left = `${Math.random() * maxX}px`;
+            target.style.top = `${Math.random() * maxY}px`;
+            
+            target.onclick = () => {
+                if (!isRunning) return;
+
+                if (itemConfig.type === 'distraction') {
+                    // PUNICAO CRÍTICA: ERRO FATAL (Instant Fail)
+                    endGame(false, '❌ ERRO FATAL: Clique na Distração Vermelha! Plantão Encerrado.');
+                    return;
+                }
+                
+                // ACERTO
+                updateScore(itemConfig.points);
+                resultMessage.textContent = `${itemConfig.icon} +${itemConfig.points} PONTOS!`;
+                target.remove();
+            };
+
+            gameArea.appendChild(target);
+
+            // Aplica a nova animação com a duração atualizada
+            target.style.animation = `pulseFade ${lifespan / 1000}s ease-in-out forwards`;
+
+            // Remove o alvo automaticamente após o tempo de vida
+            setTimeout(() => {
+                target.remove();
+            }, lifespan);
+        }
+
+        function startGame() {
+            if (isRunning) return;
+            
+            score = 0;
+            timeLeft = GAME_DURATION;
+            isRunning = true;
+            scoreDisplay.textContent = score;
+            timerDisplay.textContent = timeLeft + 's';
+            
+            startButton.style.display = 'none';
+            resultMessage.textContent = 'FOCO MÁXIMO! O VERMELHO ENCERRA O JOGO.';
+            
+            // Limpa qualquer resquício de gerador
+            clearInterval(generatorInterval);
+            
+            // Inicia o cronômetro
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft + 's';
+                
+                // Ajusta a dificuldade a cada segundo
+                applyDifficultyTier(); 
+
+                if (timeLeft <= 0) {
+                    endGame(true, 'FIM DE PLANTÃO! Seu tempo acabou.');
+                }
+            }, 1000);
+            
+            // Inicia a geração imediata
+            applyDifficultyTier();
+        }
+
+        function endGame(success, message) {
+            isRunning = false;
+            clearInterval(generatorInterval);
+            clearInterval(timerInterval);
+            
+            document.querySelectorAll('.game-target').forEach(t => t.remove());
+
+            // --- CLASSIFICAÇÃO DOS BRINDES (Ajustada para a dificuldade) ---
+            let prize = '';
+            
+            if (success === false || score < 0) { 
+                prize = 'Super Simples (Adesivo e Bala)';
+            } else if (score >= 120) { 
+                prize = 'Exclusivo (Cordão)';
+            } else if (score >= 60) { 
+                prize = 'Médio (Chaveiro Acrílico Azul)';
+            } else if (score >= 20) { 
+                prize = 'Simples (Chaveiro MDF)';
+            } else {
+                prize = 'Super Simples (Adesivo e Bala)';
+            }
+
+            resultMessage.innerHTML = `${message} <br>🏆 **Prêmio Ganho:** ${prize} (Score: ${score})`;
+            startButton.textContent = 'JOGAR DE NOVO';
+            startButton.style.display = 'block';
+        }
+
+        // --- INICIALIZAÇÃO ---
+        startButton.onclick = startGame;
+    </script>
+</body>
+</html>
