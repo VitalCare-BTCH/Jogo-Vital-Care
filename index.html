@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VitalCare - Triagem: O Jogo</title>
+    <title>VitalCare - A Triagem Caótica</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Paleta VitalCare: #1F2B5B (Fundo) | #993BC7 (Roxo) | #1EC3A5 (Turquesa) | #7FFFD4 (Verde Claro) */
+        /* CSS Integrado (Visual Gaming UI / Dark Mode) */
         
         body {
             font-family: 'Poppins', Arial, sans-serif;
@@ -19,122 +19,260 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            /* Fundo Azul Escuro Profundo (Inspirado no Gaming UI) */
-            background-color: #1F2B5B; 
+            /* Fundo Gradiente Escuro Principal */
+            background: linear-gradient(135deg, #0F172A 0%, #080D1A 100%); 
             color: #E2E8F0;
-            text-align: center;
             padding: 20px;
+            position: relative;
         }
 
+        /* --------------------------------- */
+        /* EFEITO SIMBOLOS FLUTUANTES (FUNDO) */
+        /* --------------------------------- */
+        #background-symbols {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; 
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0.1;
+        }
+        .symbol {
+            position: absolute;
+            color: #993BC7;
+            font-size: 80px;
+            animation: float 20s infinite linear;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0.5; }
+            100% { transform: translateY(-1000px) rotate(360deg); opacity: 0.1; }
+        }
+        
+        /* --------------------------------- */
+        /* LAYOUT PRINCIPAL E CONTAINER DO JOGO */
+        /* --------------------------------- */
         .game-container {
             width: 95%;
-            max-width: 900px;
-            /* Fundo translúcido com gradiente (Efeito de plataforma) */
-            background: rgba(25, 43, 91, 0.9); /* Cor base #192B5B sutilmente mais clara */
+            max-width: 800px;
+            /* Cor sólida da logo para se unir ao fundo da imagem */
+            background-color: #1F2B5B; 
             padding: 30px;
-            border-radius: 25px; /* Bordas suaves */
-            /* Sombra interna para dar profundidade (Neumorfismo Dark) */
-            box-shadow: 
-                -8px -8px 15px rgba(65, 105, 225, 0.1), /* Brilho superior (Azul) */
-                8px 8px 15px rgba(0, 0, 0, 0.4); /* Sombra inferior */
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             user-select: none;
+            text-align: center; 
+            display: none;
+        }
+
+        /* Estilização da Logo */
+        .logo-header {
+            margin-bottom: 25px;
+        }
+        .logo-header img {
+            width: 150px; 
+            height: auto;
+            filter: 
+                drop-shadow(0 0 5px rgba(127, 255, 212, 0.6))
+                drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
+            opacity: 0.95;
+        }
+
+        /* Título Principal */
+        .main-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #1EC3A5; 
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(30, 195, 165, 0.5);
         }
 
         h1 {
-            font-size: clamp(2em, 5vw, 3em);
-            color: #7FFFD4; /* Verde Neon */
+            font-size: clamp(1.8em, 5vw, 2.5em);
+            color: #7FFFD4;
+            margin-bottom: 5px;
+        }
+
+        #timer-display {
+            font-size: clamp(3em, 8vw, 4em);
             font-weight: 700;
+            color: #ffc107;
+            margin-bottom: 15px;
         }
 
         #score-display {
             font-size: 1.8em;
-            color: #1EC3A5; /* Turquesa/Ciano */
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        /* Destaque do Tempo (Radar/Chart Vibe) */
-        #timer-display {
-            font-size: clamp(3.5em, 8vw, 4.5em);
-            font-weight: 700;
-            color: #993BC7; /* Roxo/Magenta Vibrante */
             margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(153, 59, 199, 0.8); /* Efeito neon */
+            font-weight: 600;
         }
 
-        /* Área de Jogo (Onde a ação acontece) */
+        /* Área de Jogo (Foco) */
         #game-area {
             position: relative;
             height: 450px;
             width: 100%;
-            border: 2px solid #4639D5; /* Borda Azul (Limpo) */
-            border-radius: 20px;
+            border: 3px solid #993BC7; 
+            border-radius: 10px;
             overflow: hidden; 
-            background: rgba(0, 0, 0, 0.3); /* Fundo sutilmente mais escuro */
+            background: rgba(0, 0, 0, 0.4);
             cursor: crosshair;
-            margin-bottom: 25px;
         }
 
-        /* Estilo dos Alvos Flutuantes (Iconografia Clara) */
+        /* Estilo dos Alvos Flutuantes */
         .game-target {
             position: absolute;
-            width: 70px;
-            height: 70px;
+            width: 65px;
+            height: 65px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3em; /* Ícones maiores */
+            font-size: 2.5em;
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
             transition: transform 0.1s, opacity 0.2s; 
         }
         
         .game-target:active {
-            transform: scale(0.8);
-            box-shadow: 0 0 20px #7FFFD4; /* Feedback de clique vibrante */
+            transform: scale(0.85);
         }
 
         /* Cores e Símbolos dos Alvos */
-        .critical { background-color: #1EC3A5; z-index: 30; } /* Turquesa de Sucesso */
-        .coffee { background-color: #7FFFD4; z-index: 30; }   /* CORRIGIDO: Verde Claro de Bônus */
-        .distraction { background-color: #dc3545; z-index: 30; } /* Vermelho Punição */
+        .critical { background-color: #1EC3A5; z-index: 30; } 
+        .coffee { background-color: #7FFFD4; z-index: 30; }   
+        .distraction { background-color: #dc3545; z-index: 30; } 
 
-        /* Botões e Mensagens */
-        #start-button {
-            padding: 15px 35px;
+        /* Mensagens de Controle */
+        .start-button-style {
+            padding: 15px 30px;
             font-size: 1.3em;
             font-weight: bold;
             cursor: pointer;
-            background-color: #7FFFD4; /* Botão principal no Verde Neon */
-            color: #1F2B5B; /* Texto Azul Escuro */
+            background-color: #7FFFD4; 
+            color: #1F2B5B;
             border: none;
             border-radius: 50px;
             transition: background-color 0.3s;
+            text-transform: uppercase;
         }
-
-        #start-button:hover {
-            background-color: #1EC3A5; /* Turquesa no hover */
+        .start-button-style:disabled {
+            background-color: #6c757d !important;
+            cursor: not-allowed;
+            color: #e2e8f0;
         }
 
         #result-message {
             margin-top: 15px;
-            font-size: 1.3em;
+            font-size: 1.2em;
             min-height: 50px;
-            color: #993BC7; /* Cor de destaque da mensagem final */
+            color: #ffc107;
         }
 
-        /* Animação CSS mantida (para estabilidade) */
-        @keyframes pulseFade {
-            0% { opacity: 1; transform: scale(1); }
-            90% { opacity: 1; transform: scale(1.05); }
-            100% { opacity: 0; transform: scale(0.5); }
+        /* --------------------------------- */
+        /* RANKING E OVERLAY DE INÍCIO */
+        /* --------------------------------- */
+        .overlay-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
         }
+        #ranking-list {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            width: 80%;
+            max-width: 400px;
+            text-align: left;
+            list-style-position: inside;
+        }
+        #ranking-list ol {
+            padding-left: 0;
+        }
+        #ranking-list li {
+            padding: 5px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+        #name-form {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            width: 80%;
+            max-width: 400px;
+            margin-top: 20px;
+        }
+        #player-name-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #993BC7;
+            background: #2F3B5B;
+            color: white;
+            font-size: 1.1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        #player-name-input:disabled {
+            background: #1F2B5B;
+            border-color: #1EC3A5; 
+            color: #1EC3A5;
+            cursor: default;
+        }
+        #final-results {
+            margin-top: 20px;
+            text-align: left;
+            padding: 15px 30px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            font-size: 1.1em;
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid #993BC7;
+        }
+
     </style>
 </head>
 <body>
+    
+    <div id="background-symbols"></div>
+
+    <div id="ranking-overlay" class="overlay-screen">
+        <div class="main-title" style="margin-bottom: 20px;">VITAL CARE</div>
+        <h2 style="color: #7FFFD4;">Seja o Triagista Mais Rápido!</h2>
+        <div id="ranking-list"></div>
+        <form id="name-form">
+            <input type="text" id="player-name-input" placeholder="Seu Nome/Apelido" required>
+            <button type="submit" class="start-button-style" id="start-button-overlay" style="margin-top: 15px;">COMEÇAR PLANTÃO</button>
+        </form>
+        
+        <button id="export-ranking-button" class="start-button-style" 
+                style="margin-top: 30px; background-color: #993BC7; color: white; display: none;">
+            EXPORTAR RANKING COMPLETO (CSV)
+        </button>
+    </div>
+
     <div class="game-container">
+        
+        <div class="logo-header">
+             <img src="logo_vitalcare.png" alt="Logo VitalCare"> 
+        </div>
+        
+        <div class="main-title" style="margin-bottom: 10px;">VITAL CARE</div>
+        
         <h1>A Triagem Caótica: Nível TCC</h1>
         <p>20s de Plantão. CLIQUE nos Alvos de Ponto (+). Clicar no Vermelho (🛑) é ERRO CRÍTICO!</p>
 
@@ -146,16 +284,34 @@
         </div>
 
         <p id="result-message">Seu foco e velocidade definem o prêmio.</p>
+        
+        <div id="final-results" style="display: none;"></div>
+
     </div>
 
     <script>
-        // Lógica JavaScript (Mantida estável e punitiva)
+        // --- CHAVES DO LOCALSTORAGE ---
+        const RANKING_KEY = 'vitalcareRanking';
+        const PLAY_COUNTS_KEY = 'vitalcarePlayCounts';
+        const LAST_USED_NAME_KEY = 'vitalcareLastUsedName'; // Chave para travar o nome neste PC
+        
+        // --- Lista de Exceção VIP (Jogadas Ilimitadas) ---
+        const VIP_USERS = ['Wydgui', 'Fefe01'];
 
+        // --- VARIÁVEIS DE CONTROLE ---
         const gameArea = document.getElementById('game-area');
         const scoreDisplay = document.getElementById('score');
         const timerDisplay = document.getElementById('timer-display');
         const startButton = document.getElementById('start-button');
         const resultMessage = document.getElementById('result-message');
+        const finalResultsContainer = document.getElementById('final-results');
+        const backgroundSymbols = document.getElementById('background-symbols');
+        const rankingOverlay = document.getElementById('ranking-overlay');
+        const rankingListDiv = document.getElementById('ranking-list');
+        const nameForm = document.getElementById('name-form');
+        const playerNameInput = document.getElementById('player-name-input');
+        const exportButton = document.getElementById('export-ranking-button');
+        const overlayStartButton = document.getElementById('start-button-overlay');
         
         let score = 0;
         let timeLeft = 0;
@@ -163,6 +319,14 @@
         let generatorInterval;
         let timerInterval;
 
+        let criticalHits = 0;
+        let coffeeHits = 0;
+        let distractionFails = 0;
+        let currentPlayerName = 'Anônimo'; 
+        let gameID = 0;
+        
+        const MAX_PLAYS = 3; 
+        
         // Base de DIFICULDADE
         const GAME_DURATION = 20; 
         const BASE_GEN_RATE = 300; 
@@ -172,27 +336,164 @@
         const ITEM_CONFIG = [
             { type: 'critical', icon: '🚨', points: 10, weight: 2 }, 
             { type: 'coffee', icon: '☕', points: 3, weight: 3 },    
-            { type: 'distraction', icon: '🛑', points: 0, weight: 9 } // PUNIÇÃO (Maior Chance)
+            { type: 'distraction', icon: '🛑', points: 0, weight: 9 }
         ];
 
-        // --- FUNÇÕES DE LÓGICA E PONTUAÇÃO ---
-
-        function updateScore(points) {
-            score += points;
-            scoreDisplay.textContent = score;
+        // --- FUNÇÕES DE RANKING E CONTADORES ---
+        
+        function loadPlayCounts() {
+            return JSON.parse(localStorage.getItem(PLAY_COUNTS_KEY)) || {};
         }
 
-        function getRandomItemType() {
-            const totalWeight = ITEM_CONFIG.reduce((sum, item) => sum + item.weight, 0);
-            let randomNum = Math.floor(Math.random() * totalWeight);
+        function loadPlayCount(name) {
+            const counts = loadPlayCounts();
             
-            for (const item of ITEM_CONFIG) {
-                if (randomNum < item.weight) {
-                    return item;
-                }
-                randomNum -= item.weight;
+            if (VIP_USERS.includes(name)) {
+                return 0; 
+            }
+            return counts[name] || 0;
+        }
+
+        function incrementPlayCount(name) {
+            let counts = loadPlayCounts();
+            
+            if (!VIP_USERS.includes(name)) {
+                 counts[name] = (counts[name] || 0) + 1;
+            }
+            
+            localStorage.setItem(PLAY_COUNTS_KEY, JSON.stringify(counts));
+            return counts[name];
+        }
+
+        function loadRanking() {
+            const ranking = JSON.parse(localStorage.getItem(RANKING_KEY)) || [];
+            return ranking;
+        }
+
+        function saveScore(name, score, prize, hits, misses) {
+            let ranking = loadRanking();
+            
+            gameID = Date.now(); 
+
+            const newEntry = {
+                id: gameID,
+                timestamp: new Date().toLocaleString('pt-BR'),
+                name: name,
+                score: score,
+                prize: prize,
+                criticalHits: hits,
+                distractionFails: misses,
+                redeemed: false 
+            };
+
+            ranking.push(newEntry);
+            
+            ranking.sort((a, b) => b.score - a.score);
+            ranking = ranking.slice(0, 50); 
+            
+            localStorage.setItem(RANKING_KEY, JSON.stringify(ranking));
+        }
+
+        function displayRanking() {
+            const ranking = loadRanking();
+            
+            let html = '<h3>🏆 Top 10 Triagens Rápidas</h3><ol>';
+            if (ranking.length === 0) {
+                 html += '<li>Nenhum score registrado ainda. Seja o primeiro!</li>';
+            } else {
+                ranking.slice(0, 10).forEach((entry) => {
+                    const status = entry.redeemed ? ' (✅ Resgatado)' : '';
+                    html += `
+                        <li><strong>${entry.name}</strong>: ${entry.score} pts ${status}</li>
+                    `;
+                });
+            }
+            html += '</ol>';
+            rankingListDiv.innerHTML = html;
+            
+            checkAndSetStartButton();
+
+            // Garante que o ranking overlay esteja visível
+            rankingOverlay.style.display = 'flex';
+            document.querySelector('.game-container').style.display = 'none';
+        }
+        
+        function checkAndSetStartButton() {
+            const lockedName = localStorage.getItem(LAST_USED_NAME_KEY);
+            let nameForCheck = playerNameInput.value.trim().toLowerCase(); 
+
+            // 1. Lógica de Travamento (Retention)
+            if (lockedName) {
+                playerNameInput.value = lockedName;
+                playerNameInput.disabled = true;
+                nameForCheck = lockedName;
+            } else {
+                playerNameInput.disabled = false;
+            }
+
+            // 2. Lógica de Limite de Jogadas
+            const count = loadPlayCount(nameForCheck);
+            const remaining = MAX_PLAYS - count;
+            const isVIP = VIP_USERS.includes(nameForCheck);
+
+            if (!isVIP && remaining <= 0) {
+                 overlayStartButton.textContent = `LIMITE ATINGIDO (${MAX_PLAYS} JOGADAS)`;
+                 overlayStartButton.disabled = true;
+            } else {
+                 let statusText = isVIP ? `COMEÇAR PLANTÃO (ILIMITADO)` : `COMEÇAR PLANTÃO (${remaining} de ${MAX_PLAYS})`;
+                 
+                 if (lockedName && !isVIP) {
+                     statusText = `REINICIAR PLANTÃO (${remaining} de ${MAX_PLAYS})`;
+                 }
+
+                 overlayStartButton.textContent = statusText;
+                 overlayStartButton.disabled = false;
+                 if (lockedName) {
+                    playerNameInput.placeholder = `Travado: ${lockedName}`;
+                 }
             }
         }
+        
+        function exportRankingToCSV() {
+            const ranking = loadRanking();
+            
+            if (ranking.length === 0) {
+                alert('Não há dados para exportar.');
+                return;
+            }
+
+            const headers = ['ID', 'Data/Hora', 'Nome', 'Score', 'Prêmio', 'Alertas Coletados', 'Erros/Distrações', 'Resgatado'];
+            let csv = headers.join(';') + '\n'; 
+
+            ranking.forEach(entry => {
+                const row = [
+                    entry.id,
+                    entry.timestamp,
+                    `"${entry.name}"`, 
+                    entry.score,
+                    `"${entry.prize}"`,
+                    entry.criticalHits,
+                    entry.distractionFails,
+                    entry.redeemed ? 'Sim' : 'Não'
+                ].join(';');
+                csv += row + '\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Ranking_VitalCare_${new Date().toISOString().slice(0,10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            alert(`Sucesso! ${ranking.length} registros foram exportados para o arquivo CSV.`);
+        }
+        
+        // --- FUNÇÕES DE JOGO (LÓGICA) ---
         
         function getDifficultyFactors() {
             const elapsed = GAME_DURATION - timeLeft;
@@ -220,7 +521,6 @@
             generatorInterval = setInterval(createTarget, newRate);
         }
 
-
         function createTarget() {
             if (!isRunning) return;
 
@@ -242,13 +542,12 @@
                 if (!isRunning) return;
 
                 if (itemConfig.type === 'distraction') {
-                    // PUNICAO CRÍTICA: ERRO FATAL (Instant Fail)
-                    endGame(false, '❌ ERRO FATAL: Clique na Distração Vermelha! Plantão Encerrado.');
+                    distractionFails++;
+                    endGame(false, `❌ ERRO FATAL: Clique na Distração Vermelha! Plantão Encerrado.`);
                     return;
                 }
                 
-                // ACERTO
-                updateScore(itemConfig.points);
+                updateScore(itemConfig.points, itemConfig.type);
                 resultMessage.textContent = `${itemConfig.icon} +${itemConfig.points} PONTOS!`;
                 target.remove();
             };
@@ -261,18 +560,55 @@
                 target.remove();
             }, lifespan);
         }
+        
+        function updateScore(points, type) {
+            score += points;
+            scoreDisplay.textContent = score;
 
+            if (type === 'critical') criticalHits++;
+            if (type === 'coffee') coffeeHits++;
+        }
+
+        function getRandomItemType() {
+            const totalWeight = ITEM_CONFIG.reduce((sum, item) => sum + item.weight, 0);
+            let randomNum = Math.floor(Math.random() * totalWeight);
+            
+            for (const item of ITEM_CONFIG) {
+                if (randomNum < item.weight) {
+                    return item;
+                }
+                randomNum -= item.weight;
+            }
+        }
+        
         function startGame() {
             if (isRunning) return;
             
+            currentPlayerName = playerNameInput.value.trim();
+
+            if (!VIP_USERS.includes(currentPlayerName) && loadPlayCount(currentPlayerName) >= MAX_PLAYS) {
+                 alert(`Desculpe, ${currentPlayerName}! Você já atingiu o limite de ${MAX_PLAYS} jogadas.`);
+                 displayRanking();
+                 return;
+            }
+
+            // Reseta estatísticas
             score = 0;
+            criticalHits = 0;
+            coffeeHits = 0;
+            distractionFails = 0;
             timeLeft = GAME_DURATION;
             isRunning = true;
             scoreDisplay.textContent = score;
             timerDisplay.textContent = timeLeft + 's';
+            finalResultsContainer.style.display = 'none';
             
             startButton.style.display = 'none';
-            resultMessage.textContent = 'FOCO MÁXIMO! O VERMELHO ENCERRA O JOGO.';
+            
+            const statusMessage = VIP_USERS.includes(currentPlayerName) ? 
+                          `PLANTÃO ILIMITADO, ${currentPlayerName.toUpperCase()}!` :
+                          `FOCO MÁXIMO, ${currentPlayerName.toUpperCase()}! O VERMELHO ENCERRA O JOGO.`;
+            resultMessage.textContent = statusMessage;
             
             clearInterval(generatorInterval);
             
@@ -283,11 +619,18 @@
                 adjustGeneratorSpeed(); 
 
                 if (timeLeft <= 0) {
-                    endGame(true, 'FIM DE PLANTÃO! Seu tempo acabou.');
+                    endGame(true, '✅ FIM DO PLANTÃO! Seu tempo acabou.');
                 }
             }, 1000);
             
             adjustGeneratorSpeed();
+        }
+
+        function classifyPrize(finalScore) {
+            if (finalScore >= 150) return 'Exclusivo (Cordão)';
+            if (finalScore >= 90) return 'Médio (Chaveiro Acrílico Azul)';
+            if (finalScore >= 50) return 'Simples (Chaveiro MDF)';
+            return 'Super Simples (Adesivo e Bala)'; 
         }
 
         function endGame(success, message) {
@@ -298,34 +641,142 @@
             document.querySelectorAll('.game-target').forEach(t => t.remove());
 
             let finalScore = score;
-            let prize = '';
+            let prize = classifyPrize(finalScore);
             
-            // 1. Classificação de Brindes (Do maior score para o menor)
-            if (finalScore >= 150) { 
-                prize = 'Exclusivo (Cordão)';
-            } else if (finalScore >= 90) { 
-                prize = 'Médio (Chaveiro Acrílico Azul)';
-            } else if (finalScore >= 50) { 
-                prize = 'Simples (Chaveiro MDF)';
-            } else {
-                prize = 'Super Simples (Adesivo e Bala)'; 
-            }
+            // Salva o score e incrementa o contador de jogadas
+            saveScore(currentPlayerName, finalScore, prize, criticalHits, distractionFails);
+            const newPlayCount = incrementPlayCount(currentPlayerName); 
 
-            // 2. Ajuste da Mensagem: Indica o motivo do fim do jogo.
+            // 1. Monta a Mensagem e verifica se o limite foi atingido
+            let playLimitStatus = `(Jogada ${newPlayCount} de ${MAX_PLAYS})`;
+            if (VIP_USERS.includes(currentPlayerName)) {
+                playLimitStatus = '(JOGADOR VIP - ILIMITADO)';
+            } else if (newPlayCount >= MAX_PLAYS) {
+                playLimitStatus = ' (LIMITE MÁXIMO ATINGIDO!)';
+            }
+            
             if (success === false) {
-                 message = `🚨 ERRO FATAL (${finalScore})! O plantão parou na hora.`;
+                 message = `🚨 ERRO FATAL (${finalScore})! O plantão parou na hora. ${playLimitStatus}`;
             } else {
-                 message = '✅ FIM DO PLANTÃO! Seu tempo acabou.';
+                 message = `✅ FIM DO PLANTÃO! Seu tempo acabou. ${playLimitStatus}`;
             }
 
-            // O score acumulado é a base para o prêmio
-            resultMessage.innerHTML = `${message} <br>🏆 **Prêmio Ganho:** ${prize} (Score: ${finalScore})`;
-            startButton.textContent = 'JOGAR DE NOVO';
+            // 2. Montagem da Tela Final Detalhada
+            finalResultsContainer.innerHTML = `
+                <p style="font-size: 1.5em; color: #7FFFD4; font-weight: 700;">RESULTADOS DA TRIAGEM:</p>
+                <p><strong>Status:</strong> <span style="color: ${success ? '#1EC3A5' : '#dc3545'};">${success ? 'PLANTÃO COMPLETO' : 'FALHA CRÍTICA'}</span></p>
+                <p><strong>Score Final:</strong> <span style="color: #ffc107;">${finalScore}</span></p>
+                <hr style="border-color: rgba(255, 255, 255, 0.1); margin: 10px 0;">
+                <p><strong>🚨 Alertas Críticos (x10):</strong> ${criticalHits}</p>
+                <p><strong>☕ Cafés de Sobrevida (x3):</strong> ${coffeeHits}</p>
+                <p><strong>🛑 Erros Críticos/Distrações:</strong> ${distractionFails}</p>
+                <hr style="border-color: rgba(255, 255, 255, 0.1); margin: 10px 0;">
+                <p style="font-size: 1.4em; color: #993BC7;">PRÊMIO GANHO: ${prize}</p>
+                <button id="checkout-button" class="start-button-style" data-id="${gameID}" 
+                        style="background-color: #1EC3A5; margin-top: 15px;">RESGATAR PRÊMIO</button>
+            `;
+            finalResultsContainer.style.display = 'block';
+            resultMessage.textContent = message;
+            
+            startButton.textContent = 'VOLTAR AO RANKING';
+            startButton.onclick = displayRanking; 
             startButton.style.display = 'block';
+
+            document.getElementById('checkout-button').onclick = handleCheckout;
+        }
+        
+        function handleCheckout() {
+            const token = document.getElementById('checkout-button').dataset.id;
+            const password = prompt('Digite a senha da equipe (vitalcare2025) para confirmar o resgate do prêmio:'); 
+            
+            if (password === 'vitalcare2025') { 
+                let ranking = loadRanking();
+                const entryIndex = ranking.findIndex(e => String(e.id) === token);
+                
+                if (entryIndex !== -1 && !ranking[entryIndex].redeemed) {
+                    ranking[entryIndex].redeemed = true;
+                    localStorage.setItem(RANKING_KEY, JSON.stringify(ranking));
+                    alert(`Prêmio de ${ranking[entryIndex].prize} resgatado com sucesso para ${ranking[entryIndex].name}!`);
+                    displayRanking(); 
+                } else {
+                    alert('Prêmio já resgatado ou Token inválido.');
+                }
+            } else {
+                alert('Senha incorreta.');
+            }
         }
 
-        // --- INICIALIZAÇÃO ---
-        startButton.onclick = startGame;
+        function setupBackgroundSymbols() {
+            const symbols = ['🎮', '🩺', '⚡', '💊', '💙', '⚙️', '🎯'];
+            for (let i = 0; i < 20; i++) {
+                const symbol = document.createElement('div');
+                symbol.className = 'symbol';
+                symbol.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                symbol.style.left = `${Math.random() * 100}vw`;
+                symbol.style.top = `${Math.random() * 100}vh`;
+                symbol.style.animationDelay = `${Math.random() * -20}s`;
+                backgroundSymbols.appendChild(symbol);
+            }
+        }
+
+
+        // --- INICIALIZAÇÃO E EVENT HANDLERS ---
+        
+        // Manipula a entrada de nome, cheque de unicidade e inicia o jogo
+        nameForm.onsubmit = (e) => {
+            e.preventDefault();
+            
+            const name = playerNameInput.value.trim();
+            const lockedName = localStorage.getItem(LAST_USED_NAME_KEY);
+            
+            if (name.length < 3) {
+                 alert("Por favor, insira um nome válido com pelo menos 3 caracteres.");
+                 return;
+            }
+            
+            // 1. CHECAGEM DE TRAVAMENTO (Só na primeira vez neste PC)
+            if (!lockedName) {
+                const allPlayCounts = loadPlayCounts();
+                
+                if (allPlayCounts[name] && !VIP_USERS.includes(name)) {
+                    alert(`O nome "${name}" já foi utilizado por outro jogador. Por favor, escolha um nome único para o ranking!`);
+                    return; 
+                }
+                
+                localStorage.setItem(LAST_USED_NAME_KEY, name);
+                
+            } else if (name !== lockedName) {
+                alert(`Este computador está travado para o nome: ${lockedName}. Apenas ${lockedName} pode jogar aqui.`);
+                playerNameInput.value = lockedName;
+                checkAndSetStartButton();
+                return;
+            }
+
+            // 2. Checagem de limite (segurança)
+            if (!VIP_USERS.includes(name) && loadPlayCount(name) >= MAX_PLAYS) {
+                 alert(`Desculpe, ${name}! Você já atingiu o limite de ${MAX_PLAYS} jogadas.`);
+                 displayRanking();
+                 return;
+            }
+
+            // 3. INÍCIO DO JOGO
+            currentPlayerName = name;
+            
+            rankingOverlay.style.display = 'none';
+            document.querySelector('.game-container').style.display = 'block';
+            startGame(); 
+        };
+        
+        // Adiciona o listener para atualizar o contador de jogadas e o status do botão ao digitar/checar
+        playerNameInput.addEventListener('input', checkAndSetStartButton);
+        exportButton.onclick = exportRankingToCSV;
+        
+        // Inicia a aplicação
+        document.addEventListener('DOMContentLoaded', () => {
+            setupBackgroundSymbols();
+            checkAndSetStartButton(); 
+            displayRanking();
+        });
     </script>
 </body>
 </html>
