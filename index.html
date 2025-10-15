@@ -3,9 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VitalCare - A Triagem Caótica (Ultra Hard)</title>
+    <title>VitalCare - Triagem: O Jogo</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
     <style>
-        /* CSS Integrado (Visual Moderno e Punitivo) */
+        /* Paleta VitalCare: #1F2B5B (Fundo) | #993BC7 (Roxo) | #1EC3A5 (Turquesa) | #7FFFD4 (Verde Claro) */
+        
         body {
             font-family: 'Poppins', Arial, sans-serif;
             display: flex;
@@ -13,105 +19,117 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            /* Fundo Gradiente Escuro (Tema VitalCare) */
-            background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); 
+            /* Fundo Azul Escuro Profundo (Inspirado no Gaming UI) */
+            background-color: #1F2B5B; 
             color: #E2E8F0;
             text-align: center;
-            padding: 10px;
+            padding: 20px;
         }
 
         .game-container {
             width: 95%;
-            max-width: 800px;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(5px);
+            max-width: 900px;
+            /* Fundo translúcido com gradiente (Efeito de plataforma) */
+            background: rgba(25, 43, 91, 0.9); /* Cor base #192B5B sutilmente mais clara */
             padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px; /* Bordas suaves */
+            /* Sombra interna para dar profundidade (Neumorfismo Dark) */
+            box-shadow: 
+                -8px -8px 15px rgba(65, 105, 225, 0.1), /* Brilho superior (Azul) */
+                8px 8px 15px rgba(0, 0, 0, 0.4); /* Sombra inferior */
+            border: 1px solid rgba(255, 255, 255, 0.05);
             user-select: none;
         }
 
         h1 {
-            font-size: clamp(1.8em, 5vw, 2.5em);
-            color: #ADFF2F; /* Cor de destaque */
-            margin-bottom: 5px;
-        }
-
-        #timer-display {
-            font-size: clamp(3em, 8vw, 4em);
+            font-size: clamp(2em, 5vw, 3em);
+            color: #7FFFD4; /* Verde Neon */
             font-weight: 700;
-            color: #ffc107; /* Amarelo Crítico para o tempo */
-            margin-bottom: 15px;
         }
 
         #score-display {
             font-size: 1.8em;
-            margin-bottom: 20px;
+            color: #1EC3A5; /* Turquesa/Ciano */
             font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        /* Destaque do Tempo (Radar/Chart Vibe) */
+        #timer-display {
+            font-size: clamp(3.5em, 8vw, 4.5em);
+            font-weight: 700;
+            color: #993BC7; /* Roxo/Magenta Vibrante */
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(153, 59, 199, 0.8); /* Efeito neon */
         }
 
-        /* Área de Jogo (Foco) */
+        /* Área de Jogo (Onde a ação acontece) */
         #game-area {
             position: relative;
             height: 450px;
             width: 100%;
-            border: 3px solid #dc3545; /* Borda de Risco Crítico */
-            border-radius: 10px;
+            border: 2px solid #4639D5; /* Borda Azul (Limpo) */
+            border-radius: 20px;
             overflow: hidden; 
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.3); /* Fundo sutilmente mais escuro */
             cursor: crosshair;
+            margin-bottom: 25px;
         }
 
-        /* Estilo dos Alvos Flutuantes */
+        /* Estilo dos Alvos Flutuantes (Iconografia Clara) */
         .game-target {
             position: absolute;
-            width: 65px;
-            height: 65px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5em;
+            font-size: 3em; /* Ícones maiores */
             cursor: pointer;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
             transition: transform 0.1s, opacity 0.2s; 
         }
         
         .game-target:active {
-            transform: scale(0.85);
+            transform: scale(0.8);
+            box-shadow: 0 0 20px #7FFFD4; /* Feedback de clique vibrante */
         }
 
         /* Cores e Símbolos dos Alvos */
-        .critical { background-color: #28a745; z-index: 30; } /* ALVO BOM: Verde Vital */
-        .coffee { background-color: #ffc107; z-index: 30; }   /* ALVO BOM: Amarelo Bônus */
-        .distraction { background-color: #dc3545; z-index: 30; } /* ALVO RUIM: Vermelho Punição */
+        .critical { background-color: #1EC3A5; z-index: 30; } /* Turquesa de Sucesso */
+        .coffee { background-color: #7FFFD4; z-index: 30; }   /* CORRIGIDO: Verde Claro de Bônus */
+        .distraction { background-color: #dc3545; z-index: 30; } /* Vermelho Punição */
 
-        /* Animação para forçar o desaparecimento e gerar tensão */
-        @keyframes pulseFade {
-            0% { opacity: 1; transform: scale(1); }
-            90% { opacity: 1; transform: scale(1.05); }
-            100% { opacity: 0; transform: scale(0.5); }
-        }
-
-        /* Mensagens de Controle */
+        /* Botões e Mensagens */
         #start-button {
-            padding: 15px 30px;
+            padding: 15px 35px;
             font-size: 1.3em;
             font-weight: bold;
             cursor: pointer;
-            background-color: #ADFF2F;
-            color: #1E293B;
+            background-color: #7FFFD4; /* Botão principal no Verde Neon */
+            color: #1F2B5B; /* Texto Azul Escuro */
             border: none;
             border-radius: 50px;
             transition: background-color 0.3s;
         }
 
+        #start-button:hover {
+            background-color: #1EC3A5; /* Turquesa no hover */
+        }
+
         #result-message {
             margin-top: 15px;
-            font-size: 1.2em;
+            font-size: 1.3em;
             min-height: 50px;
-            color: #ffc107;
+            color: #993BC7; /* Cor de destaque da mensagem final */
+        }
+
+        /* Animação CSS mantida (para estabilidade) */
+        @keyframes pulseFade {
+            0% { opacity: 1; transform: scale(1); }
+            90% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0; transform: scale(0.5); }
         }
     </style>
 </head>
@@ -131,7 +149,8 @@
     </div>
 
     <script>
-        // --- VARIÁVEIS DE CONTROLE ---
+        // Lógica JavaScript (Mantida estável e punitiva)
+
         const gameArea = document.getElementById('game-area');
         const scoreDisplay = document.getElementById('score');
         const timerDisplay = document.getElementById('timer-display');
@@ -146,14 +165,14 @@
 
         // Base de DIFICULDADE
         const GAME_DURATION = 20; 
-        const BASE_GEN_RATE = 300; // Gera item a cada 0.3s (Extremamente Rápido!)
-        const BASE_LIFESPAN = 1200; // Duração base do alvo: 1.2s
+        const BASE_GEN_RATE = 300; 
+        const BASE_LIFESPAN = 1200; 
         
-        // CONFIGURAÇÃO DE PONTUAÇÃO (PUNITIVA E COM MAIOR CHANCE DE ERRO)
+        // CONFIGURAÇÃO DE PONTUAÇÃO (PUNITIVA)
         const ITEM_CONFIG = [
-            { type: 'critical', icon: '🚨', points: 10, weight: 2 }, // Reduzido para 10
-            { type: 'coffee', icon: '☕', points: 3, weight: 3 },    // Reduzido para 3
-            { type: 'distraction', icon: '🛑', points: 0, weight: 9 } // PUNIÇÃO (Mais de 64% de chance)
+            { type: 'critical', icon: '🚨', points: 10, weight: 2 }, 
+            { type: 'coffee', icon: '☕', points: 3, weight: 3 },    
+            { type: 'distraction', icon: '🛑', points: 0, weight: 9 } // PUNIÇÃO (Maior Chance)
         ];
 
         // --- FUNÇÕES DE LÓGICA E PONTUAÇÃO ---
@@ -175,40 +194,45 @@
             }
         }
         
-        function applyDifficultyTier() {
-            // Dificuldade Aumenta a cada 5 segundos
+        function getDifficultyFactors() {
             const elapsed = GAME_DURATION - timeLeft;
             let tier = 0;
             if (elapsed >= 15) tier = 3; 
             else if (elapsed >= 10) tier = 2; 
             else if (elapsed >= 5) tier = 1; 
             
-            // Fatores de Multiplicação da Velocidade e Duração
             const rateFactor = [1.0, 0.8, 0.6, 0.4]; 
             const lifespanFactor = [1.0, 0.8, 0.6, 0.4]; 
 
-            clearInterval(generatorInterval);
+            return {
+                newRate: BASE_GEN_RATE * rateFactor[tier],
+                newLifespan: BASE_LIFESPAN * lifespanFactor[tier]
+            };
+        }
+        
+        function adjustGeneratorSpeed() {
+            const factors = getDifficultyFactors();
             
-            const newRate = BASE_GEN_RATE * rateFactor[tier];
+            clearInterval(generatorInterval); 
+            
+            const newRate = factors.newRate;
             
             generatorInterval = setInterval(createTarget, newRate);
-            
-            return BASE_LIFESPAN * lifespanFactor[tier];
         }
+
 
         function createTarget() {
             if (!isRunning) return;
 
             const itemConfig = getRandomItemType();
             const target = document.createElement('div');
-            const lifespan = applyDifficultyTier(); 
+            
+            const factors = getDifficultyFactors();
+            const lifespan = factors.newLifespan; 
             
             target.className = `game-target ${itemConfig.type}`;
-            
-            // Define o ícone de Punição
             target.textContent = itemConfig.type === 'distraction' ? '🛑' : itemConfig.icon;
             
-            // Posição aleatória
             const maxX = gameArea.clientWidth - 70;
             const maxY = gameArea.clientHeight - 70;
             target.style.left = `${Math.random() * maxX}px`;
@@ -256,14 +280,14 @@
                 timeLeft--;
                 timerDisplay.textContent = timeLeft + 's';
                 
-                applyDifficultyTier(); 
+                adjustGeneratorSpeed(); 
 
                 if (timeLeft <= 0) {
                     endGame(true, 'FIM DE PLANTÃO! Seu tempo acabou.');
                 }
             }, 1000);
             
-            applyDifficultyTier();
+            adjustGeneratorSpeed();
         }
 
         function endGame(success, message) {
@@ -275,10 +299,8 @@
 
             let finalScore = score;
             let prize = '';
-            let failureReason = '';
             
-            // 1. CLASSIFICAÇÃO BASEADA NO SCORE (Do maior para o menor)
-            // Esta classificação IGNORA se houve falha ou não.
+            // 1. Classificação de Brindes (Do maior score para o menor)
             if (finalScore >= 150) { 
                 prize = 'Exclusivo (Cordão)';
             } else if (finalScore >= 90) { 
@@ -289,18 +311,15 @@
                 prize = 'Super Simples (Adesivo e Bala)'; 
             }
 
-            // 2. AJUSTE DA MENSAGEM: Indica o motivo do fim do jogo.
+            // 2. Ajuste da Mensagem: Indica o motivo do fim do jogo.
             if (success === false) {
-                 // A mensagem indica a penalidade, mas o prêmio (prize) já foi determinado pelo score.
                  message = `🚨 ERRO FATAL (${finalScore})! O plantão parou na hora.`;
-                 failureReason = ' (Parada por Erro)';
             } else {
                  message = '✅ FIM DO PLANTÃO! Seu tempo acabou.';
-                 failureReason = '';
             }
 
-            // A pontuação final é usada para determinar a mensagem final.
-            resultMessage.innerHTML = `${message} <br>🏆 **Prêmio Ganho:** ${prize}${failureReason} (Score: ${finalScore})`;
+            // O score acumulado é a base para o prêmio
+            resultMessage.innerHTML = `${message} <br>🏆 **Prêmio Ganho:** ${prize} (Score: ${finalScore})`;
             startButton.textContent = 'JOGAR DE NOVO';
             startButton.style.display = 'block';
         }
@@ -310,5 +329,3 @@
     </script>
 </body>
 </html>
-
-
