@@ -34,7 +34,7 @@
 
         h1 {
             font-size: clamp(1.8em, 5vw, 2.5em);
-            color: #ADFF2F; /* Verde/Ciano de destaque */
+            color: #ADFF2F; /* Cor de destaque */
             margin-bottom: 5px;
         }
 
@@ -75,7 +75,6 @@
             font-size: 2.5em;
             cursor: pointer;
             box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
-            /* A animação é definida no JS */
             transition: transform 0.1s, opacity 0.2s; 
         }
         
@@ -132,7 +131,7 @@
     </div>
 
     <script>
-        // --- VARIÁVEIS DE CONTROLE E DIFICULDADE ---
+        // --- VARIÁVEIS DE CONTROLE ---
         const gameArea = document.getElementById('game-area');
         const scoreDisplay = document.getElementById('score');
         const timerDisplay = document.getElementById('timer-display');
@@ -148,13 +147,13 @@
         // Base de DIFICULDADE
         const GAME_DURATION = 20; 
         const BASE_GEN_RATE = 300; // Gera item a cada 0.3s (Extremamente Rápido!)
-        const BASE_LIFESPAN = 1200; // Duração base do alvo: 1.2s (Desaparece antes de clicar)
+        const BASE_LIFESPAN = 1200; // Duração base do alvo: 1.2s
         
-        // Configuração de Alvos: ALTA PROBABILIDADE DE ERRO
+        // CONFIGURAÇÃO DE PONTUAÇÃO (PUNITIVA E COM MAIOR CHANCE DE ERRO)
         const ITEM_CONFIG = [
-            { type: 'critical', icon: '🚨', points: 15, weight: 2 }, // Alvo BOM (2 em 14)
-            { type: 'coffee', icon: '☕', points: 5, weight: 3 },    // Bônus (3 em 14)
-            { type: 'distraction', icon: '🛑', points: 0, weight: 9 } // PUNIÇÃO (9 em 14 - Mais de 64% de chance)
+            { type: 'critical', icon: '🚨', points: 10, weight: 2 }, // Reduzido para 10
+            { type: 'coffee', icon: '☕', points: 3, weight: 3 },    // Reduzido para 3
+            { type: 'distraction', icon: '🛑', points: 0, weight: 9 } // PUNIÇÃO (Mais de 64% de chance)
         ];
 
         // --- FUNÇÕES DE LÓGICA E PONTUAÇÃO ---
@@ -180,23 +179,21 @@
             // Dificuldade Aumenta a cada 5 segundos
             const elapsed = GAME_DURATION - timeLeft;
             let tier = 0;
-            if (elapsed >= 15) tier = 3; // 15-20s: Tier 3
-            else if (elapsed >= 10) tier = 2; // 10-15s: Tier 2
-            else if (elapsed >= 5) tier = 1; // 5-10s: Tier 1
+            if (elapsed >= 15) tier = 3; 
+            else if (elapsed >= 10) tier = 2; 
+            else if (elapsed >= 5) tier = 1; 
             
             // Fatores de Multiplicação da Velocidade e Duração
-            const rateFactor = [1.0, 0.8, 0.6, 0.4]; // Geração mais rápida (0.3s -> 0.12s)
-            const lifespanFactor = [1.0, 0.8, 0.6, 0.4]; // Duração mais curta (1.2s -> 0.48s)
+            const rateFactor = [1.0, 0.8, 0.6, 0.4]; 
+            const lifespanFactor = [1.0, 0.8, 0.6, 0.4]; 
 
-            // Limpa o intervalo antigo
             clearInterval(generatorInterval);
             
             const newRate = BASE_GEN_RATE * rateFactor[tier];
             
-            // Inicia o novo gerador (com a nova taxa de velocidade)
             generatorInterval = setInterval(createTarget, newRate);
             
-            return BASE_LIFESPAN * lifespanFactor[tier]; // Retorna nova duração
+            return BASE_LIFESPAN * lifespanFactor[tier];
         }
 
         function createTarget() {
@@ -204,7 +201,7 @@
 
             const itemConfig = getRandomItemType();
             const target = document.createElement('div');
-            const lifespan = applyDifficultyTier(); // Pega a duração com base na dificuldade atual
+            const lifespan = applyDifficultyTier(); 
             
             target.className = `game-target ${itemConfig.type}`;
             
@@ -234,10 +231,8 @@
 
             gameArea.appendChild(target);
 
-            // Aplica a nova animação com a duração atualizada
             target.style.animation = `pulseFade ${lifespan / 1000}s ease-in-out forwards`;
 
-            // Remove o alvo automaticamente após o tempo de vida
             setTimeout(() => {
                 target.remove();
             }, lifespan);
@@ -255,15 +250,12 @@
             startButton.style.display = 'none';
             resultMessage.textContent = 'FOCO MÁXIMO! O VERMELHO ENCERRA O JOGO.';
             
-            // Limpa qualquer resquício de gerador
             clearInterval(generatorInterval);
             
-            // Inicia o cronômetro
             timerInterval = setInterval(() => {
                 timeLeft--;
                 timerDisplay.textContent = timeLeft + 's';
                 
-                // Ajusta a dificuldade a cada segundo
                 applyDifficultyTier(); 
 
                 if (timeLeft <= 0) {
@@ -271,7 +263,6 @@
                 }
             }, 1000);
             
-            // Inicia a geração imediata
             applyDifficultyTier();
         }
 
@@ -282,21 +273,23 @@
             
             document.querySelectorAll('.game-target').forEach(t => t.remove());
 
-            // --- CLASSIFICAÇÃO DOS BRINDES (Ajustada para a dificuldade) ---
+            // --- CLASSIFICAÇÃO DOS BRINDES CORRIGIDA (Do maior score para o menor) ---
             let prize = '';
             
-            if (success === false || score < 0) { 
+            if (success === false) { 
+                // Instant Fail: Praticamente sempre cai no Super Simples
                 prize = 'Super Simples (Adesivo e Bala)';
-            } else if (score >= 170) { 
+            } else if (score >= 120) { 
                 prize = 'Exclusivo (Cordão)';
-            } else if (score >= 80) { 
+            } else if (score >= 60) { 
                 prize = 'Médio (Chaveiro Acrílico Azul)';
-            } else if (score >= 50) { 
+            } else if (score >= 20) { 
                 prize = 'Simples (Chaveiro MDF)';
             } else {
-                prize = 'Super Simples (Adesivo e Bala)';
+                prize = 'Super Simples (Adesivo e Bala)'; 
             }
 
+            // Mensagem ajustada para o score final e prêmio
             resultMessage.innerHTML = `${message} <br>🏆 **Prêmio Ganho:** ${prize} (Score: ${score})`;
             startButton.textContent = 'JOGAR DE NOVO';
             startButton.style.display = 'block';
