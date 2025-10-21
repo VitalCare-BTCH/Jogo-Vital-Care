@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <ul id="ranking"></ul>
+
 
     <style>
         /* CSS Integrado (Visual Gaming UI / Dark Mode) */
@@ -660,8 +662,8 @@
 
 
         function classifyPrize(finalScore) {
-            if (finalScore >= 125) return 'Exclusivo (Cordão)';
-            if (finalScore >= 100) return 'Médio (Chaveiro Acrílico Azul)';
+            if (finalScore >= 150) return 'Exclusivo (Cordão)';
+            if (finalScore >= 90) return 'Médio (Chaveiro Acrílico Azul)';
             if (finalScore >= 60) return 'Simples (Chaveiro MDF)';
             return 'Super Simples (Adesivo e Bala)'; 
         }
@@ -802,7 +804,20 @@
             displayRanking();
         });
     </script>
+    <script type="module">
+  import { addPlayer, listenRanking } from "./ranking.js";
+
+  const rankingList = document.getElementById("ranking");
+
+  // Atualiza o ranking em tempo real
+  listenRanking((players) => {
+    rankingList.innerHTML = players
+      .map((p, i) => `<li>${i + 1}. ${p.name} — ${p.score} pts</li>`)
+      .join("");
+  });
+
+  // Exemplo de adição manual (você pode adaptar)
+  // addPlayer("Guilherme", 120);
+</script>
 </body>
 </html>
-
-
